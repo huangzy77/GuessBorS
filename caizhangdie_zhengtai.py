@@ -33,6 +33,10 @@ bf_pj=mean(bf) #下午的平均波幅比
 fc=std(bf) #求方差
 print("波幅均值： %.6f"%bf_pj+"波幅方差： %.6f"%fc)
 
+#绘制概率密度函数,看看是什么分布
+kk=range(0,i-1)
+plt.hist(bf,80)#第二个参数越大，柱子分得越细
+
 P_z=sum(stats.norm.pdf(arange(-j,10,0.000001),bf_pj,fc))/1000000 #涨跌概率(密度函数有问题)
 #print(P_z_lisan)
 P_d=1-P_z
