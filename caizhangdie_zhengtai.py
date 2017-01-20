@@ -3,6 +3,7 @@ from datetime import *
 from numpy import *
 from scipy import stats
 
+
 #需要填入的变量
 j=-0.18 #当前的涨跌幅度百分比
 b_zhang=2.2 #涨率1换几
