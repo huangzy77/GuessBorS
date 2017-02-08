@@ -29,28 +29,26 @@ x2=np.zeros(len(y2))+0.32
 plt.plot(x2,y2,'r')
 plt.plot(x,y)
 plt.hist(bf,100,normed=1)
-plt.show()
+
 
 #积分求概率
 
 gl=integrate.quad(mdhs,-10,10)[0]
 print(gl)
-"""
-#统计峰度和偏态
-d1=pd.Series(bf)
-print(d1.kurt())#统计峰度
-print(d1.skew())#统计偏度
+
 #标准正太分布函数
 def gd(x,m,s):
     left=1/(math.sqrt(2*math.pi)*s)
     right=math.exp(-math.pow(x-m,2)/(2*math.pow(s,2)))
     return left*right
 #绘制图形
-plt.hist(bf,100,normed=1)#数据柱状图
-x=np.arange(-6,6,0.1)
-y=[]
-for i in x:
-	y.append(gd(i,0.069249,0.598436))
-plt.plot(x,y)
+datamean=np.mean(bf)#数据均值和均方差
+datavar=np.var(bf)
+
+x3=np.arange(-10,10,0.1)
+y3=[]
+for i in x3:
+	y3.append(gd(i,datamean,datavar))
+plt.plot(x3,y3,'r')
 plt.show()
-"""
+
