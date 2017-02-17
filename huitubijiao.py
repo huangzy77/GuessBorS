@@ -2,7 +2,7 @@
 import math
 import matplotlib.pylab as plt
 import numpy as np
-import pandas as pd
+#import pandas as pd
 from scipy import stats
 from scipy import integrate
 
