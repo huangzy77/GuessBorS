@@ -92,18 +92,17 @@ class bp(object):
 	    error = 0.0
 	    for o in range(len(label)):
 			error += 0.5 * (label[o] - self.output_cells[o]) ** 2
-			print(error)
 	    return error
 
 	#定义train方法控制迭代,该方法可以修改最大迭代次数,学习率λλ,矫正率μμ三个参数.
 	def train(self,cases,labels,limit=10000,learn=0.05,correct=0.1):
 	    for i in range(limit):
-		error = 0.0
-		for i in range(len(cases)):
-		    label = labels[i]
-		    case = cases[i]
-		    error += self.back_propagate(case,label,learn,correct)
-		 
+			error = 0.0
+			for i in range(len(cases)):
+			    label = labels[i]
+			    case = cases[i]
+			    error += self.back_propagate(case,label,learn,correct)
+		 	print(error) 
 
 	#编写test方法，演示如何使用神经网络学习异或逻辑:
 	def test(self):
@@ -115,7 +114,7 @@ class bp(object):
 		]
 	    labels = [[0],[1],[1],[0]]
 	    self.__init__(2,5,1)
-	    self.train(cases,labels,1000000,0.005,0.001)
+	    self.train(cases,labels,1000000,0.005,0.1)
 	    for case in cases:
 		print(self.predict(case))
 
