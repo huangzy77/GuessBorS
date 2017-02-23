@@ -39,8 +39,8 @@ def classifyTest(testVec_num):
 
 #获取数据
 dataclean=da.get_cleandata()
-trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(10,dataclean)
-print trainVec
+trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(8,dataclean)
+#print trainVec
 #bayes分类
 
 clf=GaussianNB().fit(trainVec,trainLabelsVec)
@@ -49,12 +49,12 @@ clf=GaussianNB().fit(trainVec,trainLabelsVec)
 P_wrong=classifyTest(testVecNum)
 
 #用于预测当前
-dqzd=-0.0015#当前１３时涨跌幅度百分比换算成小数
-dqcj=435800#当前成交量
-zrcj=212000000#昨日成交量
-b_zhang=1.88#涨赔率
-b_die=1.01#跌赔率
-k=7000#当前余额
+dqzd=-0.0039#当前１３时涨跌幅度百分比换算成小数
+dqcj=117000000#当前成交量
+zrcj=207000000#昨日成交量
+b_zhang=6.21#涨赔率
+b_die=1.16#跌赔率
+k=6303#当前余额
 
 nowData=[dqzd,dqcj/zrcj]#第一个为１３时涨跌幅，第二个为１３时成交金额比例
 classifierResult_now=clf.predict(np.array(nowData).reshape((1,-1)))

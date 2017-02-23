@@ -1,7 +1,8 @@
 #coding=utf-8
-import ANNBP as bp
+from sklearn.naive_bayes import GaussianNB
 import data_clean as da
 import numpy as np
+
 
 #数据设置函数
 #整理数据data_zl　０、交易日期　１、开盘涨跌幅度　２＼１３时涨跌幅度　３＼１３时成交金额涨跌幅度　４、昨日收盘点位　５昨日成交金额　６今日收盘涨跌情况０为跌１为涨
@@ -10,14 +11,26 @@ def setData(bfb,dataset):#bfb指数据集中用来测试的数据百分比，dat
 	trainVecNum=dataset.shape[0]-testVecNum#用于训练的行数
 
 	trainVec=np.zeros((trainVecNum,2))#初始化数据容器
-	trainLabelsVec=np.zeros((trainVecNum,1))
+	trainLabelsVec=[]
 	testVec=np.zeros((testVecNum,2))
-	testLabelsVec=np.zeros((testVecNum,1))
+	testLabelsVec=[]
 
-	trainVec[:,0]=dataset[0:trainVecNum,2]#填充数据容器
-	trainVec[:,1]=dataset[0:trainVecNum,3]
-	#trainVec[:,2]=dataset[0:trainVecNum,1]
-	trainLabelsVec=dataset[0:trainVecNum,6]
+	#填充数据容器
+	testVecIndex=np.random.choice(np.arange(0,dataset.shape[0]),testVecNum,False)#存储随机抽取的行数	
+	i=0
+	j=0
+	for dataindex in np.arange(dataset.shape[0]):
+		if dataindex in testVecIndex:		
+			testVec[i,0]=dataset[dataindex,2]
+			testVec[i,1]=dataset[dataindex,3]
+			testLabelsVec.append(dataset[dataindex,6])
+			i+=1
+		else:		
+			trainVec[j,0]=dataset[dataindex,2]
+			trainVec[j,1]=dataset[dataindex,3]
+			trainLabelsVec.append(dataset[dataindex,6])
+			j+=1
+		
 
 	testVec[:,0]=dataset[trainVecNum:dataset.shape[0],2]#填充数据容器
 	testVec[:,1]=dataset[trainVecNum:dataset.shape[0],3]
@@ -30,7 +43,7 @@ def setData(bfb,dataset):#bfb指数据集中用来测试的数据百分比，dat
 def classifyTest(testVec_num):
 	errorCount=0
 	for i in range(testVec_num):
-		classifierResult=bpNet.predict(testVec[i,:].reshape((1,-1)))
+		classifierResult=clf.predict(testVec[i,:].reshape((1,-1)))
 		print("分类器结果是：%d,实际情况是：%d"%(classifierResult,testLabelsVec[i]))
 		if(classifierResult!=testLabelsVec[i]):errorCount+=1
 	cuowulv=errorCount/float(testVec_num)
@@ -40,25 +53,24 @@ def classifyTest(testVec_num):
 #获取数据
 dataclean=da.get_cleandata()
 trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(8,dataclean)
-#trainVec=trainVec.tolist()
-#trainLabelsVec=trainLabelsVec.tolist()
-print(trainVec.shape,trainLabelsVec)############trainLabelsVec有错误
-#神经网络预测
-bpNet=bp.bp(2,5,1)
-bpNet.train(trainVec, trainLabelsVec,1000,0.8,0.1)
+#print trainVec
+#bayes分类
+
+clf=GaussianNB().fit(trainVec,trainLabelsVec)
+
 #测试这个分类器并统计争取率
 P_wrong=classifyTest(testVecNum)
 
 #用于预测当前
-dqzd=-0.0015#当前１３时涨跌幅度百分比换算成小数
-dqcj=435800#当前成交量
-zrcj=212000000#昨日成交量
-b_zhang=1.88#涨赔率
-b_die=1.01#跌赔率
-k=7000#当前余额
+dqzd=-0.0039#当前１３时涨跌幅度百分比换算成小数
+dqcj=117000000#当前成交量
+zrcj=207000000#昨日成交量
+b_zhang=6.21#涨赔率
+b_die=1.16#跌赔率
+k=6303#当前余额
 
 nowData=[dqzd,dqcj/zrcj]#第一个为１３时涨跌幅，第二个为１３时成交金额比例
-classifierResult_now=clf.predict(nowData)
+classifierResult_now=clf.predict(np.array(nowData).reshape((1,-1)))
 print("当前预测结果为：%d"%classifierResult_now)
 
 #凯利公式测试
@@ -69,4 +81,5 @@ if classifierResult_now==1:
 if classifierResult_now==-1:
 	buy_dl=((P_right*(b_die-1)-P_wrong)/(b_die-1))*k
 	print("今天买跌额度：%d"%buy_dl)
+
 
