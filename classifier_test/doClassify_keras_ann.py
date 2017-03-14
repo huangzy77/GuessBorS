@@ -1,7 +1,13 @@
 #coding=utf-8
-from sklearn.naive_bayes import GaussianNB
+
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout
+from keras.optimizers import SGD
+
+
 import data_clean as da
 import numpy as np
+np.random.seed(1337)  # for reproducibility
 
 #数据设置函数
 #整理数据data_zl　０、交易日期　１、开盘涨跌幅度　２＼１３时涨跌幅度　３＼１３时成交金额涨跌幅度　４、昨日收盘点位　５昨日成交金额　６今日收盘涨跌情况０为跌１为涨 7上午最高点幅度　８上午最低点幅度
@@ -32,28 +38,39 @@ def setData(bfb,dataset):#bfb指数据集中用来测试的数据百分比，dat
 
 	return trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum
 
-#分类测试函数
-def classifyTest(testVec_num):
-	errorCount=0
-	for i in range(testVec_num):
-		classifierResult=clf.predict(testVec[i,:].reshape((1,-1)))
-		print("分类器结果是：%d,实际情况是：%d"%(classifierResult,testLabelsVec[i]))
-		if(classifierResult!=testLabelsVec[i]):errorCount+=1
-	cuowulv=errorCount/float(testVec_num)
-	print("错误率为：%f"%(errorCount/float(testVec_num)))
-	return cuowulv
 
 #获取数据
 dataclean=da.get_cleandata()
 trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(8,dataclean)
-print trainVec[:,1]
-#bayes分类
+#print trainVec
 
-clf=GaussianNB().fit(trainVec,trainLabelsVec)
 
-#测试这个分类器并统计争取率
-P_wrong=classifyTest(testVecNum)
+#构造神经网络
 
+model = Sequential() 
+model.add(Dense(64, input_dim=5, init='uniform'))
+model.add(Activation('tanh'))
+model.add(Dropout(0.5))
+model.add(Dense(64, init='uniform'))
+model.add(Activation('tanh'))
+model.add(Dropout(0.5))
+model.add(Dense(1, init='uniform'))
+model.add(Activation('softmax')) 
+
+   
+# 设定学习率（lr）等参数   编译
+sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+model.compile(loss='mse',optimizer=sgd,metrics=['accuracy'])
+
+
+#训练这个网络
+model.fit(trainVec, trainLabelsVec, batch_size=200, nb_epoch=1000,shuffle=True, verbose=1, validation_split=0.3)   
+print 'test set'  
+
+#测试这个网络 
+print model.evaluate(testVec, testLabelsVec)  
+
+'''
 #用于预测当前
 dqzd=-0.0037#当前１３时涨跌幅度百分比换算成小数
 dqcj=92898000#当前成交量
@@ -77,5 +94,5 @@ if classifierResult_now==1:
 if classifierResult_now==-1:
 	buy_dl=((P_right*(b_die-1)-P_wrong)/(b_die-1))*k
 	print("今天买跌额度：%d"%buy_dl)
-
+'''
 

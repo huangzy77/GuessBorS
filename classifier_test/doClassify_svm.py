@@ -1,8 +1,7 @@
 #coding=utf-8
-from sklearn.naive_bayes import GaussianNB
+from sklearn import svm
 import data_clean as da
 import numpy as np
-
 
 #数据设置函数
 #整理数据data_zl　０、交易日期　１、开盘涨跌幅度　２＼１３时涨跌幅度　３＼１３时成交金额涨跌幅度　４、昨日收盘点位　５昨日成交金额　６今日收盘涨跌情况０为跌１为涨
@@ -11,31 +10,19 @@ def setData(bfb,dataset):#bfb指数据集中用来测试的数据百分比，dat
 	trainVecNum=dataset.shape[0]-testVecNum#用于训练的行数
 
 	trainVec=np.zeros((trainVecNum,2))#初始化数据容器
-	trainLabelsVec=[]
+	trainLabelsVec=np.zeros((trainVecNum,1))
 	testVec=np.zeros((testVecNum,2))
-	testLabelsVec=[]
+	testLabelsVec=np.zeros((testVecNum,1))
 
-	#填充数据容器
-	testVecIndex=np.random.choice(np.arange(0,dataset.shape[0]),testVecNum,False)#存储随机抽取的行数	
-	i=0
-	j=0
-	for dataindex in np.arange(dataset.shape[0]):
-		if dataindex in testVecIndex:		
-			testVec[i,0]=dataset[dataindex,2]
-			testVec[i,1]=dataset[dataindex,3]
-			testLabelsVec.append(dataset[dataindex,6])
-			i+=1
-		else:		
-			trainVec[j,0]=dataset[dataindex,2]
-			trainVec[j,1]=dataset[dataindex,3]
-			trainLabelsVec.append(dataset[dataindex,6])
-			j+=1
-		
+	trainVec[:,0]=dataset[0:trainVecNum,2]#填充数据容器
+	trainVec[:,1]=dataset[0:trainVecNum,3]
+	#trainVec[:,2]=dataset[0:trainVecNum,1]
+	trainLabelsVec[:,0]=dataset[0:trainVecNum,6]
 
 	testVec[:,0]=dataset[trainVecNum:dataset.shape[0],2]#填充数据容器
 	testVec[:,1]=dataset[trainVecNum:dataset.shape[0],3]
 	#testVec[:,2]=dataset[trainVecNum:dataset.shape[0],1]
-	testLabelsVec=dataset[trainVecNum:dataset.shape[0],6]
+	testLabelsVec[:,0]=dataset[trainVecNum:dataset.shape[0],6]
 
 	return trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum
 
@@ -52,25 +39,25 @@ def classifyTest(testVec_num):
 
 #获取数据
 dataclean=da.get_cleandata()
-trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(10,dataclean)
+trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(8,dataclean)
 #print trainVec
-#bayes分类
+#svm分类
 
-clf=GaussianNB().fit(trainVec,trainLabelsVec)
+clf=svm.SVC()
+clf.fit(trainVec,trainLabelsVec)
 
 #测试这个分类器并统计争取率
 P_wrong=classifyTest(testVecNum)
 
-'
 #用于预测当前
-dqzd=-1#当前１３时涨跌1涨－１跌
-dqcj=-1#当前成交量对比昨日成交量1大－１小
-
+dqzd=-0.0028#当前１３时涨跌幅度百分比换算成小数
+dqcj=99761300#当前成交量
+zrcj=209000000#昨日成交量
 b_zhang=2.61#涨赔率
-b_die=1.5#跌赔率
+b_die=1.54#跌赔率
 k=6363#当前余额
 
-nowData=[dqzd,dqcj]#第一个为１３时涨跌幅，第二个为１３时成交金额比例
+nowData=[dqzd,dqcj/zrcj]#第一个为１３时涨跌幅，第二个为１３时成交金额比例
 classifierResult_now=clf.predict(np.array(nowData).reshape((1,-1)))
 print("当前预测结果为：%d"%classifierResult_now)
 
@@ -82,5 +69,5 @@ if classifierResult_now==1:
 if classifierResult_now==-1:
 	buy_dl=((P_right*(b_die-1)-P_wrong)/(b_die-1))*k
 	print("今天买跌额度：%d"%buy_dl)
-'''
+
 

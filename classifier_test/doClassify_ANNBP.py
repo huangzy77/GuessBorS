@@ -42,7 +42,7 @@ dataclean=da.get_cleandata()
 trainVec,trainLabelsVec,testVec,testLabelsVec,testVecNum=setData(8,dataclean)
 #trainVec=trainVec.tolist()
 #trainLabelsVec=trainLabelsVec.tolist()
-print(trainVec.shape,trainLabelsVec)############trainLabelsVec有错误
+print _AtrainLabelsVec############trainLabelsVec有错误
 #神经网络预测
 bpNet=bp.bp(2,5,1)
 bpNet.train(trainVec, trainLabelsVec,1000,0.8,0.1)
